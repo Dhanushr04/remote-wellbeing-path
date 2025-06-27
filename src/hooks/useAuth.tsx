@@ -1,10 +1,12 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User } from '@/types/api';
-import { authService } from '@/services/authService';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+import { User as AppUser } from '@/types/api';
 
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
+  session: Session | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string, role: 'patient' | 'doctor') => Promise<void>;
   logout: () => Promise<void>;
@@ -15,22 +17,63 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in
-    const currentUser = authService.getCurrentUser();
-    if (currentUser && authService.isAuthenticated()) {
-      setUser(currentUser);
-    }
-    setLoading(false);
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        
+        if (session?.user) {
+          // Get user profile from profiles table
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profileData) {
+            setUser({
+              id: profileData.id,
+              email: profileData.email,
+              name: profileData.name,
+              role: profileData.role as 'patient' | 'doctor',
+              createdAt: profileData.created_at,
+              updatedAt: profileData.updated_at,
+            });
+          }
+        } else {
+          setUser(null);
+        }
+        
+        setLoading(false);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (!session) {
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await authService.login({ email, password });
-      setUser(response.user);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -39,8 +82,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (email: string, password: string, name: string, role: 'patient' | 'doctor') => {
     try {
-      const response = await authService.register({ email, password, name, role });
-      setUser(response.user);
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            name,
+            role,
+          },
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;
@@ -49,8 +107,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      await authService.logout();
-      setUser(null);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
     } catch (error) {
       console.error('Logout failed:', error);
       throw error;
@@ -59,10 +119,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const value = {
     user,
+    session,
     login,
     register,
     logout,
-    isAuthenticated: !!user,
+    isAuthenticated: !!session,
     loading,
   };
 

@@ -1,54 +1,118 @@
 
-import { apiClient } from '@/lib/api';
-import { AuthResponse, LoginRequest, RegisterRequest, User } from '@/types/api';
+import { supabase } from '@/integrations/supabase/client';
+import { User } from '@/types/api';
 
 class AuthService {
-  async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
-    
-    // Store tokens in localStorage
-    localStorage.setItem('authToken', response.token);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    localStorage.setItem('user', JSON.stringify(response.user));
-    
-    return response;
+  async login(email: string, password: string): Promise<{ user: User }> {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (!data.user) {
+      throw new Error('Login failed');
+    }
+
+    // Get user profile from profiles table
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profileError) {
+      throw new Error('Failed to get user profile');
+    }
+
+    const user: User = {
+      id: profileData.id,
+      email: profileData.email,
+      name: profileData.name,
+      role: profileData.role as 'patient' | 'doctor',
+      createdAt: profileData.created_at,
+      updatedAt: profileData.updated_at,
+    };
+
+    return { user };
   }
 
-  async register(userData: RegisterRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/register', userData);
+  async register(email: string, password: string, name: string, role: 'patient' | 'doctor' = 'patient'): Promise<{ user: User }> {
+    const redirectUrl = `${window.location.origin}/`;
     
-    // Store tokens in localStorage
-    localStorage.setItem('authToken', response.token);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    localStorage.setItem('user', JSON.stringify(response.user));
-    
-    return response;
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          name,
+          role,
+        },
+      },
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (!data.user) {
+      throw new Error('Registration failed');
+    }
+
+    const user: User = {
+      id: data.user.id,
+      email: email,
+      name: name,
+      role: role,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    return { user };
   }
 
   async logout(): Promise<void> {
-    try {
-      await apiClient.post('/auth/logout', {});
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // Clear local storage
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      throw new Error(error.message);
     }
   }
 
-  getCurrentUser(): User | null {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+  async getCurrentUser(): Promise<User | null> {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return null;
+    }
+
+    // Get user profile from profiles table
+    const { data: profileData, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (error || !profileData) {
+      return null;
+    }
+
+    return {
+      id: profileData.id,
+      email: profileData.email,
+      name: profileData.name,
+      role: profileData.role as 'patient' | 'doctor',
+      createdAt: profileData.created_at,
+      updatedAt: profileData.updated_at,
+    };
   }
 
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem('authToken');
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem('authToken');
+  async isAuthenticated(): Promise<boolean> {
+    const { data: { user } } = await supabase.auth.getUser();
+    return !!user;
   }
 }
 

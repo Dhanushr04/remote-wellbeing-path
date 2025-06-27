@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,8 +19,12 @@ const Index = () => {
               <Link to="/dashboard" className="text-gray-600 hover:text-blue-600 transition-colors">Dashboard</Link>
               <Link to="/doctors" className="text-gray-600 hover:text-blue-600 transition-colors">Find Doctors</Link>
               <Link to="/records" className="text-gray-600 hover:text-blue-600 transition-colors">Medical Records</Link>
-              <Button variant="outline" className="mr-2">Login</Button>
-              <Button>Sign Up</Button>
+              <Link to="/auth">
+                <Button variant="outline" className="mr-2">Login</Button>
+              </Link>
+              <Link to="/auth">
+                <Button>Sign Up</Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -44,14 +47,18 @@ const Index = () => {
             prescriptions, and follow-up care from the comfort of your home.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-              <Video className="mr-2 h-5 w-5" />
-              Start Consultation
-            </Button>
-            <Button size="lg" variant="outline">
-              <Calendar className="mr-2 h-5 w-5" />
-              Schedule Appointment
-            </Button>
+            <Link to="/auth">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+                <Video className="mr-2 h-5 w-5" />
+                Start Consultation
+              </Button>
+            </Link>
+            <Link to="/auth">
+              <Button size="lg" variant="outline">
+                <Calendar className="mr-2 h-5 w-5" />
+                Schedule Appointment
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -154,10 +161,12 @@ const Index = () => {
             Join thousands of patients who trust TeleMed for their healthcare needs
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100">
-              <Phone className="mr-2 h-5 w-5" />
-              Talk to a Doctor Now
-            </Button>
+            <Link to="/auth">
+              <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100">
+                <Phone className="mr-2 h-5 w-5" />
+                Talk to a Doctor Now
+              </Button>
+            </Link>
             <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
               Learn More
             </Button>
