@@ -24,15 +24,15 @@ class DoctorsService {
     }
     
     const endpoint = `/doctors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return apiClient.get<Doctor[]>(endpoint);
+    return apiClient.get(endpoint);
   }
 
   async getDoctorById(id: string): Promise<Doctor> {
-    return apiClient.get<Doctor>(`/doctors/${id}`);
+    return apiClient.get(`/doctors/${id}`);
   }
 
   async getDoctorAvailability(doctorId: string, date: string): Promise<string[]> {
-    return apiClient.get<string[]>(`/doctors/${doctorId}/availability?date=${date}`);
+    return apiClient.get(`/doctors/${doctorId}/availability?date=${date}`);
   }
 }
 
