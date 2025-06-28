@@ -4,23 +4,29 @@ import { MedicalRecord } from '@/types/api';
 
 class RecordsService {
   async getRecords(): Promise<MedicalRecord[]> {
-    return apiClient.get('/records');
+    return apiClient.get<MedicalRecord[]>('/records');
   }
 
   async getRecordById(id: string): Promise<MedicalRecord> {
-    return apiClient.get(`/records/${id}`);
+    return apiClient.get<MedicalRecord>(`/records/${id}`);
   }
 
-  async createRecord(recordData: Omit<MedicalRecord, 'id' | 'date'>): Promise<MedicalRecord> {
-    return apiClient.post('/records', recordData);
+  async getRecordsByType(type: string): Promise<MedicalRecord[]> {
+    return apiClient.get<MedicalRecord[]>(`/records?type=${type}`);
   }
 
-  async updateRecord(id: string, data: Partial<MedicalRecord>): Promise<MedicalRecord> {
-    return apiClient.put(`/records/${id}`, data);
-  }
-
-  async deleteRecord(id: string): Promise<void> {
-    return apiClient.delete(`/records/${id}`);
+  async downloadRecord(id: string): Promise<Blob> {
+    const response = await fetch(`/api/records/${id}/download`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to download record');
+    }
+    
+    return response.blob();
   }
 }
 

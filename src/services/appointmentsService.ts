@@ -11,19 +11,19 @@ export interface CreateAppointmentRequest {
 
 class AppointmentsService {
   async getAppointments(): Promise<Appointment[]> {
-    return apiClient.get('/appointments');
+    return apiClient.get<Appointment[]>('/appointments');
   }
 
   async getAppointmentById(id: string): Promise<Appointment> {
-    return apiClient.get(`/appointments/${id}`);
+    return apiClient.get<Appointment>(`/appointments/${id}`);
   }
 
   async createAppointment(appointmentData: CreateAppointmentRequest): Promise<Appointment> {
-    return apiClient.post('/appointments', appointmentData);
+    return apiClient.post<Appointment>('/appointments', appointmentData);
   }
 
   async updateAppointment(id: string, data: Partial<Appointment>): Promise<Appointment> {
-    return apiClient.put(`/appointments/${id}`, data);
+    return apiClient.put<Appointment>(`/appointments/${id}`, data);
   }
 
   async cancelAppointment(id: string): Promise<void> {
@@ -31,7 +31,7 @@ class AppointmentsService {
   }
 
   async getUpcomingAppointments(): Promise<Appointment[]> {
-    return apiClient.get('/appointments/upcoming');
+    return apiClient.get<Appointment[]>('/appointments/upcoming');
   }
 }
 

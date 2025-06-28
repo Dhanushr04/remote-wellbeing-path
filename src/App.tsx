@@ -12,7 +12,6 @@ import Doctors from "./pages/Doctors";
 import Consultation from "./pages/Consultation";
 import Records from "./pages/Records";
 import Appointments from "./pages/Appointments";
-import EnergyTracker from "./pages/EnergyTracker";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,14 +24,13 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<EnergyTracker />} />
+            <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/doctors" element={<Doctors />} />
             <Route path="/appointments" element={<Appointments />} />
             <Route path="/consultation" element={<Consultation />} />
             <Route path="/records" element={<Records />} />
-            <Route path="/energy" element={<EnergyTracker />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
