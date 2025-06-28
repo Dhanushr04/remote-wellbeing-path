@@ -4,26 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Clock, Video, FileText, Bell, Plus } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabaseApi } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 
 const PatientDashboard = () => {
-  const upcomingAppointments = [
-    {
-      id: 1,
-      doctor: "Dr. Sarah Johnson",
-      specialty: "Cardiologist",
-      date: "Today, 2:00 PM",
-      type: "Video Call",
-      avatar: "/placeholder.svg"
-    },
-    {
-      id: 2,
-      doctor: "Dr. Michael Chen",
-      specialty: "Dermatologist",
-      date: "Tomorrow, 10:30 AM",
-      type: "Video Call",
-      avatar: "/placeholder.svg"
-    }
-  ];
+  const navigate = useNavigate();
+
+  const { data: appointments } = useQuery({
+    queryKey: ['appointments'],
+    queryFn: supabaseApi.appointments.getAll,
+  });
+
+  const upcomingAppointments = appointments?.filter(
+    (apt: any) => apt.status === 'scheduled' && new Date(apt.scheduled_at) > new Date()
+  )?.slice(0, 2) || [];
 
   const recentRecords = [
     {
@@ -53,15 +48,26 @@ const PatientDashboard = () => {
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-4 gap-4 mb-8">
-          <Button className="h-20 flex-col bg-blue-600 hover:bg-blue-700">
+          <Button 
+            className="h-20 flex-col bg-blue-600 hover:bg-blue-700"
+            onClick={() => navigate('/consultation')}
+          >
             <Video className="h-6 w-6 mb-2" />
             Start Consultation
           </Button>
-          <Button variant="outline" className="h-20 flex-col">
+          <Button 
+            variant="outline" 
+            className="h-20 flex-col"
+            onClick={() => navigate('/appointments')}
+          >
             <Calendar className="h-6 w-6 mb-2" />
             Book Appointment
           </Button>
-          <Button variant="outline" className="h-20 flex-col">
+          <Button 
+            variant="outline" 
+            className="h-20 flex-col"
+            onClick={() => navigate('/records')}
+          >
             <FileText className="h-6 w-6 mb-2" />
             View Records
           </Button>
@@ -80,35 +86,48 @@ const PatientDashboard = () => {
                   <CardTitle>Upcoming Appointments</CardTitle>
                   <CardDescription>Your scheduled consultations</CardDescription>
                 </div>
-                <Button size="sm">
+                <Button size="sm" onClick={() => navigate('/appointments')}>
                   <Plus className="h-4 w-4 mr-2" />
                   New Appointment
                 </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {upcomingAppointments.map((appointment) => (
-                    <div key={appointment.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <Avatar>
-                          <AvatarImage src={appointment.avatar} />
-                          <AvatarFallback>{appointment.doctor.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h3 className="font-semibold">{appointment.doctor}</h3>
-                          <p className="text-sm text-gray-600">{appointment.specialty}</p>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <Clock className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm text-gray-600">{appointment.date}</span>
+                  {upcomingAppointments.length === 0 ? (
+                    <div className="text-center py-6 text-gray-500">
+                      No upcoming appointments
+                    </div>
+                  ) : (
+                    upcomingAppointments.map((appointment: any) => {
+                      const scheduledDate = new Date(appointment.scheduled_at);
+                      return (
+                        <div key={appointment.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center space-x-4">
+                            <Avatar>
+                              <AvatarImage src="/placeholder.svg" />
+                              <AvatarFallback>
+                                {appointment.doctor?.name.split(' ').map((n: string) => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <h3 className="font-semibold">Dr. {appointment.doctor?.name}</h3>
+                              <p className="text-sm text-gray-600">Healthcare Provider</p>
+                              <div className="flex items-center space-x-2 mt-1">
+                                <Clock className="h-4 w-4 text-gray-400" />
+                                <span className="text-sm text-gray-600">
+                                  {scheduledDate.toLocaleDateString()} at {scheduledDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="secondary" className="capitalize">{appointment.type}</Badge>
+                            <Button size="sm">Join Call</Button>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="secondary">{appointment.type}</Badge>
-                        <Button size="sm">Join Call</Button>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -181,7 +200,7 @@ const PatientDashboard = () => {
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">12</div>
+                    <div className="text-2xl font-bold text-blue-600">{appointments?.length || 0}</div>
                     <div className="text-sm text-gray-600">Consultations</div>
                   </div>
                   <div className="text-center">
