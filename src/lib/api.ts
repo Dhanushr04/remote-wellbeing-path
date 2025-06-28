@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export const apiClient = {
-  async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  async request(endpoint: string, options: RequestInit = {}): Promise<any> {
     const response = await fetch(endpoint, options);
     
     if (!response.ok) {
@@ -12,28 +12,28 @@ export const apiClient = {
     return response.json();
   },
 
-  get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' });
+  get(endpoint: string): Promise<any> {
+    return this.request(endpoint, { method: 'GET' });
   },
 
-  post<T>(endpoint: string, data: any): Promise<T> {
-    return this.request<T>(endpoint, {
+  post(endpoint: string, data: any): Promise<any> {
+    return this.request(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' }
     });
   },
 
-  put<T>(endpoint: string, data: any): Promise<T> {
-    return this.request<T>(endpoint, {
+  put(endpoint: string, data: any): Promise<any> {
+    return this.request(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' }
     });
   },
 
-  delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+  delete(endpoint: string): Promise<any> {
+    return this.request(endpoint, { method: 'DELETE' });
   },
 };
 
