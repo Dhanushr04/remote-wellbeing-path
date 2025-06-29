@@ -13,11 +13,11 @@ export const apiClient = {
   },
 
   get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' });
+    return this.request(endpoint, { method: 'GET' });
   },
 
   post<T>(endpoint: string, data: any): Promise<T> {
-    return this.request<T>(endpoint, {
+    return this.request(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' }
@@ -25,7 +25,7 @@ export const apiClient = {
   },
 
   put<T>(endpoint: string, data: any): Promise<T> {
-    return this.request<T>(endpoint, {
+    return this.request(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' }
@@ -33,7 +33,7 @@ export const apiClient = {
   },
 
   delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+    return this.request(endpoint, { method: 'DELETE' });
   },
 };
 
