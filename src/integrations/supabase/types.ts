@@ -109,27 +109,42 @@ export type Database = {
       }
       profiles: {
         Row: {
+          bio: string | null
+          consultation_fee: number | null
           created_at: string
           email: string
+          experience: number | null
           id: string
           name: string
+          rating: number | null
           role: string
+          specialization: string | null
           updated_at: string
         }
         Insert: {
+          bio?: string | null
+          consultation_fee?: number | null
           created_at?: string
           email: string
+          experience?: number | null
           id: string
           name: string
+          rating?: number | null
           role?: string
+          specialization?: string | null
           updated_at?: string
         }
         Update: {
+          bio?: string | null
+          consultation_fee?: number | null
           created_at?: string
           email?: string
+          experience?: number | null
           id?: string
           name?: string
+          rating?: number | null
           role?: string
+          specialization?: string | null
           updated_at?: string
         }
         Relationships: []

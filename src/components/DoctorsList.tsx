@@ -156,14 +156,18 @@ const DoctorsList = () => {
                         <div className="flex items-center space-x-4 mb-3">
                           <div className="flex items-center space-x-1">
                             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="font-medium">4.8</span>
-                            <span className="text-gray-600">(Reviews coming soon)</span>
+                            <span className="font-medium">{doctor.rating || 4.8}</span>
+                            <span className="text-gray-600">({doctor.experience || 0}+ years exp)</span>
                           </div>
                           <div className="flex items-center space-x-1 text-gray-600">
                             <MapPin className="h-4 w-4" />
                             <span>Healthcare Center</span>
                           </div>
                         </div>
+                        
+                        {doctor.bio && (
+                          <p className="text-gray-600 mb-3 text-sm">{doctor.bio}</p>
+                        )}
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                           <div>
@@ -176,7 +180,7 @@ const DoctorsList = () => {
                             <span className="font-medium">Member since:</span> {new Date(doctor.created_at).toLocaleDateString()}
                           </div>
                           <div>
-                            <span className="font-medium">Consultation Fee:</span> $120
+                            <span className="font-medium">Consultation Fee:</span> ${doctor.consultation_fee || 120}
                           </div>
                         </div>
                       </div>

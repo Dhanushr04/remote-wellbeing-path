@@ -1,10 +1,13 @@
-
 export interface User {
   id: string;
   email: string;
   name: string;
   role: 'patient' | 'doctor';
   specialization?: string;
+  experience?: number;
+  rating?: number;
+  bio?: string;
+  consultation_fee?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -15,7 +18,7 @@ export interface Doctor extends User {
   rating: number;
   availability: string[];
   bio: string;
-  consultationFee: number;
+  consultation_fee: number;
 }
 
 export interface Appointment {
