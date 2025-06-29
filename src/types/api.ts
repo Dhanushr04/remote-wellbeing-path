@@ -4,6 +4,7 @@ export interface User {
   email: string;
   name: string;
   role: 'patient' | 'doctor';
+  specialization?: string;
   createdAt: string;
   updatedAt: string;
 }

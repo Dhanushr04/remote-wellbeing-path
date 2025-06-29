@@ -156,7 +156,32 @@ export const supabaseApi = {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('role', 'doctor');
+        .eq('role', 'doctor')
+        .order('name', { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+
+    async getDoctorById(id: string) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .eq('role', 'doctor')
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+
+    async updateProfile(id: string, updates: any) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
       
       if (error) throw error;
       return data;
